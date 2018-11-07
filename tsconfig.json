@@ -1,25 +1,26 @@
 {
   "compilerOptions": {
     "allowJs": false,
-    "lib": ["es2015", "es2017"],
+    "esModuleInterop": true,
+    "lib": ["es2017"],
     "module": "commonjs",
     "moduleResolution": "node",
-    "target": "es5",
-    "noImplicitReturns": true,
+    "newLine": "LF",
     "noFallthroughCasesInSwitch": true,
-    "noUnusedLocals": false,
-    "pretty": true,
-    "strict": true,
-    "sourceMap": true,
-    "outDir": "./lib",
-    "skipLibCheck": true,
     "noImplicitAny": true,
-    "esModuleInterop": true,
-    "declaration": true,
-    "resolveJsonModule": true
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "outDir": "./dist",
+    "pretty": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strict": true,
+    "strictNullChecks": true,
+    "strictPropertyInitialization": true,
+    "target": "es2017",
+    "typeRoots": ["./node_modules/@types", "./types"]
   },
-  "include": [
-    "src/**/*"
-  ],
-  "compileOnSave": false
+  "compileOnSave": true,
+  "include": ["./src/**/*"]
 }
