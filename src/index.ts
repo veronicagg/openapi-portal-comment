@@ -10,8 +10,8 @@ export = (app: Application) => {
 
     if (prContent.base.ref === 'master') {
       app.log('PR against master')
-      const prFromOwnerRepo = prContent.head.repo.full_name
-      const prFromRef = prContent.head.ref
+      const prFromOwnerRepo = encodeURIComponent(prContent.head.repo.full_name)
+      const prFromRef = encodeURIComponent(prContent.head.ref)
       app.log(`repo: ${prFromOwnerRepo}, branch: ${prFromRef}`)
       const prComment = context.issue({
         body: `If you're a MSFT employee, click [this link](https://portal.azure-devex-tools.com/app/branch/${prFromOwnerRepo}/${prFromRef}?source=github)
