@@ -10,7 +10,7 @@ export = (app: Application) => {
 
     if (prContent.base.ref === 'master') {
       app.log('PR against master')
-      const prFromOwnerRepo = encodeURIComponent(prContent.head.repo.full_name)
+      const prFromOwnerRepo = prContent.head.repo.full_name
       const prFromRef = encodeURIComponent(prContent.head.ref)
       app.log(`repo: ${prFromOwnerRepo}, branch: ${prFromRef}`)
       const prComment = context.issue({
