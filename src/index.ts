@@ -47,7 +47,7 @@ export = (app: Application) => {
         if (firstVersion !== undefined) {
           if (
             partialSwagger.rpName !== firstVersion.rpName ||
-            partialSwagger.version ||
+            partialSwagger.version !==
             firstVersion.version
           ) {
             hasMulti = true
