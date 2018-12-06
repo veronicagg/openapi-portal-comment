@@ -20,7 +20,7 @@ export = (app: Application) => {
         owner: prContent.head.repo.owner.login,
         repo: prContent.head.repo.name
       })
-      hasMultiVersions = checkForMultiVersions(prFiles.data)
+      hasMultiVersions = checkForValidPRPayload(prFiles.data)
     }
 
     if (prContent.base.ref === 'master' && !hasMultiVersions) {
@@ -36,10 +36,10 @@ export = (app: Application) => {
     }
   })
 
-  const checkForMultiVersions = (entries: PullRequestsGetFilesResponseItem[]): boolean => {
+  const checkForValidPRPayload = (entries: PullRequestsGetFilesResponseItem[]): boolean => {
     app.log('getting files')
     let firstVersion: PartialSwagger
-    let hasMulti: boolean = false
+    let InvalidPrPayload: boolean = false
     entries.forEach(element => {
       app.log(`file found for path: ${element.contents_url}`)
       const partialSwagger = swaggerPathScraper.parsePathToSwagger(element.contents_url)
@@ -47,10 +47,10 @@ export = (app: Application) => {
         if (firstVersion !== undefined) {
           if (
             partialSwagger.rpName !== firstVersion.rpName ||
-            partialSwagger.version !==
-            firstVersion.version
+            partialSwagger.version !== firstVersion.version
           ) {
-            hasMulti = true
+            InvalidPrPayload = true
+            app.log(`multiple versions found for PR`)
           }
         } else {
           firstVersion = partialSwagger
@@ -58,9 +58,12 @@ export = (app: Application) => {
         app.log(
           `swagger file found for version: ${partialSwagger.version} name: ${partialSwagger.rpName}`
         )
+      } else {
+        app.log(`path is not supported: ${element.contents_url}`)
+        InvalidPrPayload = true
       }
     })
-    return hasMulti
+    return InvalidPrPayload
   }
 
   // For more information on building apps:
