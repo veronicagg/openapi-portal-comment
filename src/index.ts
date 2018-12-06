@@ -20,7 +20,10 @@ export = (app: Application) => {
         owner: prContent.head.repo.owner.login,
         repo: prContent.head.repo.name
       })
-      hasMultiVersions = checkForValidPRPayload(prFiles.data)
+      // below checks to make sure there is a spec file that matches our portal requirements:
+      //    Files must only update a single RP and a single version
+      //    Files must be using a valid path that is parsable to obtain the RP and version information
+      hasMultiVersions = checkForInvalidVersions(prFiles.data)
     }
 
     if (prContent.base.ref === 'master' && !hasMultiVersions) {
@@ -36,10 +39,11 @@ export = (app: Application) => {
     }
   })
 
-  const checkForValidPRPayload = (entries: PullRequestsGetFilesResponseItem[]): boolean => {
+  const checkForInvalidVersions = (entries: PullRequestsGetFilesResponseItem[]): boolean => {
     app.log('getting files')
-    let firstVersion: PartialSwagger
-    let InvalidPrPayload: boolean = false
+    let firstVersion: PartialSwagger | undefined
+    let isInvalid: boolean = false
+
     entries.forEach(element => {
       app.log(`file found for path: ${element.contents_url}`)
       const partialSwagger = swaggerPathScraper.parsePathToSwagger(element.contents_url)
@@ -49,21 +53,28 @@ export = (app: Application) => {
             partialSwagger.rpName !== firstVersion.rpName ||
             partialSwagger.version !== firstVersion.version
           ) {
-            InvalidPrPayload = true
-            app.log(`multiple versions found for PR`)
+            // more than one RP or version was detected.  Jump out of loop and return true
+            app.log(`multiple versions or RPs detected with ${element.contents_url}`)
+            isInvalid = true
           }
         } else {
-          firstVersion = partialSwagger
+          if (firstVersion === undefined) {
+            firstVersion = partialSwagger
+            app.log(`a valid swagger has been found for ${element.contents_url}`)
+          }
         }
         app.log(
           `swagger file found for version: ${partialSwagger.version} name: ${partialSwagger.rpName}`
         )
-      } else {
-        app.log(`path is not supported: ${element.contents_url}`)
-        InvalidPrPayload = true
+      }
+      // no files were found that could be parsed
+      if (firstVersion === undefined) {
+        app.log(`no valid folder structures found within the files in the PR`)
+        isInvalid = true
       }
     })
-    return InvalidPrPayload
+
+    return isInvalid
   }
 
   // For more information on building apps:
