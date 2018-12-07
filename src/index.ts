@@ -45,27 +45,31 @@ export = (app: Application) => {
     let isInvalid: boolean = false
 
     entries.forEach(element => {
-      app.log(`file found for path: ${element.contents_url}`)
-      const partialSwagger = swaggerPathScraper.parsePathToSwagger(element.contents_url)
-      if (partialSwagger !== undefined) {
-        if (firstVersion !== undefined) {
-          if (
-            partialSwagger.rpName !== firstVersion.rpName ||
-            partialSwagger.version !== firstVersion.version
-          ) {
-            // more than one RP or version was detected.  Jump out of loop and return true
-            app.log(`multiple versions or RPs detected with ${element.contents_url}`)
-            isInvalid = true
+      if (isInvalid === false) {
+        app.log(`file found for path: ${element.contents_url}`)
+        const partialSwagger = swaggerPathScraper.parsePathToSwagger(element.contents_url)
+        if (partialSwagger !== undefined) {
+          if (firstVersion !== undefined) {
+            if (
+              partialSwagger.rpName !== firstVersion.rpName ||
+              partialSwagger.version !== firstVersion.version
+            ) {
+              // more than one RP or version was detected.  Jump out of loop and return true
+              app.log(`multiple versions or RPs detected with ${element.contents_url}`)
+              isInvalid = true
+            }
           }
-        } else {
           if (firstVersion === undefined) {
             firstVersion = partialSwagger
             app.log(`a valid swagger has been found for ${element.contents_url}`)
           }
+
+          app.log(
+            `swagger file found for version: ${partialSwagger.version} name: ${
+              partialSwagger.rpName
+            }`
+          )
         }
-        app.log(
-          `swagger file found for version: ${partialSwagger.version} name: ${partialSwagger.rpName}`
-        )
       }
       // no files were found that could be parsed
       if (firstVersion === undefined) {
@@ -73,7 +77,6 @@ export = (app: Application) => {
         isInvalid = true
       }
     })
-
     return isInvalid
   }
 
